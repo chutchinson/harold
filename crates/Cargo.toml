@@ -1,0 +1,3 @@
+[workspace]
+resolver = "3"
+members = ["harold-as", "harold-fmt", "harold-ir", "harold-vm"]

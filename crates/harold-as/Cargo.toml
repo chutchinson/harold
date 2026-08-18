@@ -1,0 +1,7 @@
+[package]
+name = "harold-as"
+version = "0.0.1"
+edition = "2024"
+
+[dependencies]
+harold-ir = { path = "../harold-ir" }
