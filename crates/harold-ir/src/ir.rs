@@ -12,6 +12,7 @@ pub enum Statement {
 
 #[derive(Debug)]
 pub enum Operand {
+    None,
     Register(String),
     Integer(i16),
     Float(f32),

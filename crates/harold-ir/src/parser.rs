@@ -10,12 +10,14 @@ peg::parser! {
         }
 
     rule statement() -> Statement
-        = _? v:label() _? { Statement::Label(v) }
-        / _? v:instruction() _? { Statement::Instruction(v) }
+        = __? v:label() _? { Statement::Label(v) }
+        / __? v:instruction() _? { Statement::Instruction(v) }
 
     rule instruction() -> InstructionDef
         = mnemonic:identifier() _ operands:(operand() ** ",")
         { InstructionDef { mnemonic, operands }}
+        / mnemonic:identifier()
+        { InstructionDef { mnemonic, operands: vec![] } }
 
     rule operand() -> Operand
         = _? v:number() { Operand::Integer(v) }
@@ -25,6 +27,7 @@ peg::parser! {
         = "rx" { "rx".to_string() }
         / "ry" { "ry".to_string() }
         / "rz" { "rz".to_string() }
+        / "rv" { "rv".to_string() }
         / "rw" { "rw".to_string() }
         / "sp" { "sp".to_string() }
 

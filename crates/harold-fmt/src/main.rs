@@ -17,7 +17,8 @@ struct Args {
 fn format(input: &str, out: &mut impl Write) -> Result<(), std::fmt::Error> {
     let document = match harold_ir::asm_parser::document(input) {
         Ok(document) => document,
-        Err(_) => {
+        Err(e) => {
+            eprintln!("ERROR: {:?}", e);
             return Err(std::fmt::Error);
         }
     };
@@ -34,6 +35,7 @@ fn format(input: &str, out: &mut impl Write) -> Result<(), std::fmt::Error> {
 
                 for (index, operand) in instruction.operands.iter().enumerate() {
                     match operand {
+                        Operand::None => {}
                         Operand::Register(name) => {
                             write!(out, "{}", name)?;
                         }
@@ -76,8 +78,9 @@ fn main() {
     };
 
     let mut output = String::new();
-    if format(&input, &mut output).is_err() {
-        eprintln!("ERROR: failed to parse document");
+    let result = format(&input, &mut output);
+    if result.is_err() {
+        eprintln!("ERROR: failed to parse document: {:?}", result);
         std::process::exit(1);
     }
 

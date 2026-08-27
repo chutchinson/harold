@@ -1,6 +1,4 @@
-loop:
+start:
+    mov rx, 10
     mov rz, rx
-    mov rz, rw
-    mov rx, 0
-test:
-    mov rz, 10
+    print 
