@@ -3,10 +3,11 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
+const RAM_SIZE: usize = 64 * 1024;
+
 struct Cpu {
-    memory: [u8; 100],
+    memory: [u8; RAM_SIZE],
     rip: usize, // rip (register instruction pointer)
-    rsp: usize, // rsp (register stack pointer),
     rx: u16,
     ry: u16,
     rz: u16,
@@ -16,13 +17,12 @@ struct Cpu {
 
 impl Cpu {
     pub fn new(program: &[u8]) -> Self {
-        let mut memory = [0; 100];
+        let mut memory = [0; RAM_SIZE];
         memory[..program.len()].copy_from_slice(program);
 
         Cpu {
             memory,
             rip: 0,
-            rsp: 0,
             rx: 0,
             ry: 0,
             rz: 0,
