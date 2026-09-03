@@ -45,6 +45,12 @@ fn format(input: &str, out: &mut impl Write) -> Result<(), std::fmt::Error> {
                         Operand::Float(value) => {
                             write!(out, "{}", value)?;
                         }
+                        Operand::Address(value) => {
+                            write!(out, "[{}]", value)?;
+                        }
+                        Operand::RegisterAddress(register) => {
+                            write!(out, "[{}]", register)?;
+                        }
                     }
                     if index < instruction.operands.len() - 1 {
                         write!(out, ", ")?;

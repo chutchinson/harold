@@ -55,14 +55,20 @@ fn main() {
                             "rx" => {
                                 bytecode.push(0x06);
                                 bytecode.push(data);
+                                bytecode.push(0x00);
+                                bytecode.push(0x00);
                             }
                             "ry" => {
                                 bytecode.push(0x07);
                                 bytecode.push(data);
+                                bytecode.push(0x00);
+                                bytecode.push(0x00);
                             }
                             "rv" => {
                                 bytecode.push(0x0e);
                                 bytecode.push(data);
+                                bytecode.push(0x00);
+                                bytecode.push(0x00);
                             }
                             _ => {
                                 eprintln!("unrecognized register: {}", register);
@@ -75,17 +81,25 @@ fn main() {
                             ("rz", "rx") => {
                                 bytecode.push(0x04);
                                 bytecode.push(0x00);
+                                bytecode.push(0x00);
+                                bytecode.push(0x00);
                             }
                             ("ry", "rx") => {
                                 bytecode.push(0x0b);
+                                bytecode.push(0x00);
+                                bytecode.push(0x00);
                                 bytecode.push(0x00);
                             }
                             ("rx", "ry") => {
                                 bytecode.push(0x0f);
                                 bytecode.push(0x00);
+                                bytecode.push(0x00);
+                                bytecode.push(0x00);
                             }
                             ("rz", "ry") => {
                                 bytecode.push(0x0c);
+                                bytecode.push(0x00);
+                                bytecode.push(0x00);
                                 bytecode.push(0x00);
                             }
                             _ => {
@@ -94,25 +108,52 @@ fn main() {
                             }
                         }
                     }
+                    ("mov", Operand::Address(addr), Operand::Integer(v)) => {
+                        // TODO: choose a more sane instruction encoding so we don't lose memory resolution
+                        bytecode.push(0x11);
+                        bytecode.push(*addr as u8);
+                        bytecode.push((*addr >> 8) as u8);
+                        bytecode.push(*v as u8);
+                    }
+                    ("mov", Operand::RegisterAddress(register), Operand::Integer(v)) => {
+                        if register != "rz" {
+                            eprintln!("unhandled mov {}", register);
+                            std::process::exit(0);
+                        }
+                        bytecode.push(0x12);
+                        bytecode.push(0x00);
+                        bytecode.push(0x00);
+                        bytecode.push(*v as u8);
+                    }
                     ("print", Operand::None, Operand::None) => {
                         bytecode.push(0x03);
+                        bytecode.push(0x00);
+                        bytecode.push(0x00);
                         bytecode.push(0x00);
                     }
                     ("add", Operand::None, Operand::None) => {
                         bytecode.push(0x01);
                         bytecode.push(0x00);
+                        bytecode.push(0x00);
+                        bytecode.push(0x00);
                     }
                     ("dec", Operand::None, Operand::None) => {
                         bytecode.push(0x0f);
+                        bytecode.push(0x00);
+                        bytecode.push(0x00);
                         bytecode.push(0x00);
                     }
                     ("jg", Operand::Integer(addr), Operand::None) => {
                         bytecode.push(0x0a);
                         // TODO: is this correct way to encode signed 8-bit in binary in Rust?
                         bytecode.push(*addr as i8 as u8);
+                        bytecode.push(0x00);
+                        bytecode.push(0x00);
                     }
                     ("hlt", Operand::None, Operand::None) => {
                         bytecode.push(0x10);
+                        bytecode.push(0x00);
+                        bytecode.push(0x00);
                         bytecode.push(0x00);
                     }
                     _ => {
@@ -124,8 +165,8 @@ fn main() {
         }
     }
 
-    println!("{:02x?}", bytecode);
-    println!("{}", bytecode.len());
+    // println!("{:02x?}", bytecode);
+    // println!("{}", bytecode.len());
 
     if let Err(err) = fs::write(&args.output, bytecode) {
         eprintln!("ERROR: failed to write {}: {}", args.output.display(), err);

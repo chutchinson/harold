@@ -13,7 +13,9 @@ pub enum Statement {
 #[derive(Debug)]
 pub enum Operand {
     None,
+    Address(u16),
     Register(String),
+    RegisterAddress(String),
     Integer(i16),
     Float(f32),
 }

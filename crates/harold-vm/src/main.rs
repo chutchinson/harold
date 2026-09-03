@@ -32,6 +32,8 @@ impl Cpu {
     }
 
     pub fn cycle(&mut self) {
+        const STEP: usize = 4;
+
         // fetch-decode-execute
         if self.rip >= self.memory.len() {
             self.halt = true;
@@ -40,48 +42,50 @@ impl Cpu {
 
         // fetch
         let opcode = self.memory[self.rip];
-        let data = self.memory[self.rip + 1];
+        let data: u16 =
+            self.memory[self.rip + 1] as u16 | ((self.memory[self.rip + 2] as u16) << 8);
+        let imm = self.memory[self.rip + 3];
 
         // decode
         match opcode {
             0x00 => {
                 // NOP
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x01 => {
                 // ADD rx, ry -> rz
                 self.rz = self.rx + self.ry;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x02 => {
                 // SUB rx, ry -> rz
                 self.rz = self.rx - self.ry;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x03 => {
                 // PRINT rz
                 println!("{}", self.rz);
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x04 => {
                 // MOV rx -> rz
                 self.rz = self.rx;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x05 => {
                 // MOV ry -> rz
                 self.rz = self.ry;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x06 => {
                 // MOV rx, value
                 self.rx = data as u16;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x07 => {
                 // MOV ry, value
                 self.ry = data as u16;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x08 => {
                 // JMP addr
@@ -92,7 +96,7 @@ impl Cpu {
                 if self.rz == 0 {
                     self.rip = data as usize;
                 } else {
-                    self.rip += 2;
+                    self.rip += STEP;
                 }
             }
             0x0a => {
@@ -100,43 +104,52 @@ impl Cpu {
                 if self.rz > 0 {
                     self.rip = data as usize;
                 } else {
-                    self.rip += 2;
+                    self.rip += STEP;
                 }
             }
             0x0b => {
                 // MOV ry -> rx
                 self.rx = self.ry;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x0c => {
                 // MOV rz -> ry
                 self.ry = self.rz;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x0d => {
                 // MOV rv -> rz
                 self.rz = self.rv;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x0e => {
                 // MOV rv, value
                 self.rv = data as u16;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x0f => {
                 // DEC rv -> rz
                 self.rv = self.rv.wrapping_sub(1);
                 self.rz = self.rv;
-                self.rip += 2;
+                self.rip += STEP;
             }
             0x10 => {
                 // HALT
                 self.halt = true;
             }
+            0x11 => {
+                // mov [<addr>], <imm>
+                self.memory[data as usize] = imm as u8;
+                self.rip += STEP;
+            }
+            0x12 => {
+                self.memory[self.rz as usize] = imm as u8;
+                self.rip += STEP;
+            }
             _ => {
                 // Unknown instruction
                 println!("Unknown instruction: {}", opcode);
-                self.rip += 2;
+                self.rip += STEP;
             }
         }
     }
@@ -164,4 +177,6 @@ fn main() {
     while !cpu.halt {
         cpu.cycle();
     }
+
+    println!("{:02x?}", &cpu.memory[128..128 + 16]);
 }
