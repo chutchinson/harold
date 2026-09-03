@@ -1,21 +1,37 @@
 use std::collections::HashMap;
+use std::fs;
+use std::path::PathBuf;
 
+use clap::Parser;
 use harold_ir::*;
-
-// Abstract Syntax Tree (AST)
-
-// Source Code -> AST -> Analysis -> Emit
-// Analysis -> Lexical Analysis (parsing) -> Semantic Analysis (verification)
 
 struct Label {
     offset: usize,
 }
 
-fn main() {
-    println!("harold-as");
+/// Assemble a Harold assembly file into bytecode.
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Path to the Harold assembly file to assemble.
+    path: PathBuf,
 
-    let input = include_str!("../../../examples/fib.asm");
-    let result = asm_parser::document(input).unwrap();
+    /// Filename where the assembled bytecode will be written.
+    #[arg(short, long)]
+    output: PathBuf,
+}
+
+fn main() {
+    let args = Args::parse();
+
+    let input = match fs::read_to_string(&args.path) {
+        Ok(input) => input,
+        Err(err) => {
+            eprintln!("ERROR: failed to read {}: {}", args.path.display(), err);
+            std::process::exit(1);
+        }
+    };
+    let result = asm_parser::document(&input).unwrap();
 
     let mut labels: HashMap<String, Label> = HashMap::new();
     let mut bytecode: Vec<u8> = vec![];
@@ -108,19 +124,11 @@ fn main() {
         }
     }
 
-    // sprintf("hello: %d");
-
     println!("{:02x?}", bytecode);
     println!("{}", bytecode.len());
 
-    std::fs::write("debug", bytecode).unwrap();
-
-    // println!("{:?}", result);
+    if let Err(err) = fs::write(&args.output, bytecode) {
+        eprintln!("ERROR: failed to write {}: {}", args.output.display(), err);
+        std::process::exit(1);
+    }
 }
-
-// Backus-Naur Form / Extended Backus-Naur Form
-// https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form
-
-// parser generator (BNF, EBNF; PEG, LR, GLR, LALR / Regex)
-// parser expression grammar (PEG)
-// recursive-descent parsers

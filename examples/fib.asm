@@ -5,7 +5,7 @@ loop:
     mov rz, rx
     print 
     add 
-    mov rx, ry
+    mov ry, rx
     mov rz, ry
     dec 
     jg 6

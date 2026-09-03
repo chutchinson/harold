@@ -1,3 +1,8 @@
+use std::fs;
+use std::path::PathBuf;
+
+use clap::Parser;
+
 struct Cpu {
     memory: [u8; 100],
     rip: usize, // rip (register instruction pointer)
@@ -137,10 +142,25 @@ impl Cpu {
     }
 }
 
-fn main() {
-    let program = include_bytes!("../../debug");
+/// Execute a Harold bytecode file.
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Path to the Harold bytecode file to execute.
+    path: PathBuf,
+}
 
-    let mut cpu = Cpu::new(program);
+fn main() {
+    let args = Args::parse();
+    let program = match fs::read(&args.path) {
+        Ok(program) => program,
+        Err(err) => {
+            eprintln!("ERROR: failed to read {}: {}", args.path.display(), err);
+            std::process::exit(1);
+        }
+    };
+
+    let mut cpu = Cpu::new(&program);
     while !cpu.halt {
         cpu.cycle();
     }
