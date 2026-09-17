@@ -33,13 +33,16 @@ fn main() {
     };
     let result = asm_parser::document(&input).unwrap();
 
-    let mut labels: HashMap<String, Label> = HashMap::new();
+    let mut labels: HashMap<String, usize> = HashMap::new();
     let mut bytecode: Vec<u8> = vec![];
 
     for statement in result.statements.iter() {
         match statement {
             Statement::Comment(_) => {}
-            Statement::Label(label) => {}
+            Statement::Label(label) => {
+                let addr = bytecode.len();
+                labels.insert(label.name.to_string(), addr);
+            }
             Statement::Instruction(instruction) => {
                 // TODO: compile
                 let op_1 = instruction.operands.get(0).unwrap_or(&Operand::None);
@@ -147,6 +150,14 @@ fn main() {
                         bytecode.push(0x0a);
                         // TODO: is this correct way to encode signed 8-bit in binary in Rust?
                         bytecode.push(*addr as i8 as u8);
+                        bytecode.push(0x00);
+                        bytecode.push(0x00);
+                    }
+                    ("jg", Operand::Label(name), Operand::None) => {
+                        bytecode.push(0x0a);
+                        let addr = labels.get(name).expect("no label");
+                        // TODO: is this correct way to encode signed 8-bit in binary in Rust?
+                        bytecode.push(*addr as u8);
                         bytecode.push(0x00);
                         bytecode.push(0x00);
                     }

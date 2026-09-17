@@ -24,6 +24,7 @@ peg::parser! {
         / _? v:register()       { Operand::Register(v) }
         / _? v:addr()           { Operand::Address(v) }
         / _? v:register_addr()  { Operand::RegisterAddress(v) }
+        / _? v:identifier()     { Operand::Label(v) }
 
     rule register() -> String
         = "rx" { "rx".to_string() }

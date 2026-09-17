@@ -51,6 +51,9 @@ fn format(input: &str, out: &mut impl Write) -> Result<(), std::fmt::Error> {
                         Operand::RegisterAddress(register) => {
                             write!(out, "[{}]", register)?;
                         }
+                        Operand::Label(name) => {
+                            write!(out, "{}", name)?;
+                        }
                     }
                     if index < instruction.operands.len() - 1 {
                         write!(out, ", ")?;

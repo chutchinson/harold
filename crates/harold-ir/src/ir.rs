@@ -18,6 +18,7 @@ pub enum Operand {
     RegisterAddress(String),
     Integer(i16),
     Float(f32),
+    Label(String),
 }
 
 #[derive(Debug)]

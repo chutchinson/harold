@@ -8,5 +8,5 @@ loop:
     mov ry, rx
     mov rz, ry
     dec 
-    jg 12
-    hlt 
+    jg loop
+    hlt
